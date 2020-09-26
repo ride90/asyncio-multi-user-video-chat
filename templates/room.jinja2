@@ -1,0 +1,23 @@
+{% extends "base.jinja2" %}
+
+{% block main %}
+  <div class="container">
+    <div class="row">
+      <div class="column column-50">
+        <video id="video-client" class="video" autoplay></video>
+      </div>
+    </div>
+    <div class="row">
+      <div class="column column-50">
+        <video id="video-server" class="video" autoplay></video>
+      </div>
+      <div class="column column-50">
+        <video class="video" autoplay></video>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block js %}
+  <script type="text/javascript" src="/static/room.js"></script>
+{% endblock %}

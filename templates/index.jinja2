@@ -1,0 +1,18 @@
+{% extends "base.jinja2" %}
+
+{% block main %}
+  <div class="container center">
+    <button class="button button-outline new-room" id="btn-new-room">Create new room</button>
+    <button class="button new-room" id="btn-loader" disabled="disabled" style="display: none">Creating..</button>
+    <form class="room-form" id="room-form" method="get" style="display: none">
+      <input id="room-link" type="email" disabled="disabled" name="email" value="">
+      <button id="go-to-room">GO</button>
+      <br/>
+      <label class="label-inline" for="confirmField">Share this URL with your friends so that can join a call.</label>
+    </form>
+  </div>
+{% endblock %}
+
+{% block js %}
+  <script type="text/javascript" src="/static/index.js"></script>
+{% endblock %}

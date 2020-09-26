@@ -1,0 +1,45 @@
+.container {
+    max-width: 112.0rem !important;
+}
+
+.row {
+    padding-bottom: 10px;
+}
+
+.center {
+    text-align: center;
+    vertical-align: center;
+}
+
+.container-new-room {
+    text-align: center;
+    vertical-align: center;
+    width: 300px;
+}
+
+.video {
+    background-color: #f4f5f6;
+    width: 100%;
+}
+
+#video-client {
+    width: 50%;
+    background-color: #3d997038;
+}
+
+.new-room {
+    margin-top: 150px;
+}
+
+.room-form {
+    display: inline-block;
+    margin-top: 150px;
+}
+
+#room-link {
+    width: 580px;
+}
+
+#go-to-room {
+
+}
