@@ -78,9 +78,6 @@ async def ws_handler(request):
 
     # wait for messages
     async for msg in ws:
-
-        print(id(ws), '[Ws] New msg', msg.type, len(msg.data))
-
         if msg.type == aiohttp.WSMsgType.TEXT:
             # decode json
             try:
@@ -88,7 +85,6 @@ async def ws_handler(request):
             except json.decoder.JSONDecodeError:
                 await ws.close(code=1003)
                 break
-
             # join room
             if data.get('action') == 'join' and data.get('room_id'):
                 try:
@@ -96,9 +92,12 @@ async def ws_handler(request):
                     request.app['rooms'][room_id]['peers'][peer["id"]] = peer
                     print(f"Added new peer to room {room_id}")
                     pprint(request.app['rooms'][room_id]['peers'])
-                except KeyError as e:
-                    print(f'[WS] Can not setup peer, no room with id: {room_id}')
+                    print('\n\n\n')
+                except KeyError:
                     await ws.close()
+                    print(f'[WS] Can not setup peer, no room with id: {room_id}')
+                    break
+
                 await ws.send_json({'status': 'joined'})
             else:
                 await ws.close()
@@ -109,7 +108,6 @@ async def ws_handler(request):
             # send binary to all peers in current rooms except the current one
             room = request.app['rooms'][room_id]
             for _peer in [p for p in room['peers'].values() if p['id'] != peer["id"]]:
-                print(f'Resend binary from {peer["id"]} to {_peer["id"]}')
                 await _peer['ws'].send_bytes(msg.data)
             # await ws.send_bytes(msg.data)
 

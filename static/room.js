@@ -7,11 +7,34 @@ const roomID = window.location.pathname.split('/')[2]
 let roomJoined = false;
 let ws = null;
 const videoClient = document.getElementById('video-client');
-const videoServer = document.getElementById('video-server');
-const codec = 'video/webm; codecs="vp8"';
-let mediaSource = new window.MediaSource();
-let mediaSourceBuffer = null;
+const canvasClient = document.getElementById('canvas-client');
+canvasClient.width = 640;
+canvasClient.height = 480;
+const imgServer = document.getElementById('image-server');
 
+// const codec = 'video/webm; codecs="vp8"';
+// let mediaSource = new window.MediaSource();
+// let mediaSourceBuffer = null;
+
+function dataURItoBlob(dataURI) {
+    // convert base64/URLEncoded data component to raw binary data held in a string
+    var byteString;
+    if (dataURI.split(',')[0].indexOf('base64') >= 0)
+        byteString = atob(dataURI.split(',')[1]);
+    else
+        byteString = unescape(dataURI.split(',')[1]);
+
+    // separate out the mime component
+    var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+
+    // write the bytes of the string to a typed array
+    var ia = new Uint8Array(byteString.length);
+    for (var i = 0; i < byteString.length; i++) {
+        ia[i] = byteString.charCodeAt(i);
+    }
+
+    return new Blob([ia], {type: mimeString});
+}
 
 function connectWebSocket() {
     ws = new WebSocket(window._config['ws_url']);
@@ -26,20 +49,22 @@ function connectWebSocket() {
         }));
     }
     ws.onmessage = function (e) {
-        console.log('onmessage', typeof e.data);
+        console.log('[WS] onmessage', typeof e.data);
 
         if (typeof e.data === "string") {
             let data = JSON.parse(e.data);
             if (data['status'] === 'joined') {
+                console.log('[WS] room joined');
                 roomJoined = true;
             }
-        } else if (mediaSourceBuffer != null && !mediaSourceBuffer.updating) {
-            // add bytes to buffer
-            console.log(e);
-            mediaSourceBuffer.appendBuffer(
-                new Uint8Array(e.data)
-                //e.data
-            );
+        } else {
+            let url = window.URL.createObjectURL(
+                new Blob([e.data], {type: "image/jpeg"})
+            )
+            imgServer.onload = function () {
+                window.URL.revokeObjectURL(url);
+            };
+            imgServer.src = url;
         }
     };
     ws.onclose = function (e) {
@@ -73,25 +98,26 @@ navigator.mediaDevices
     .then((stream) => {
         window.stream = stream;
         videoClient.srcObject = stream;
-
-        // this is how we get media
-        const recorder = new MediaRecorder(stream, {mimeType: codec});
-        recorder.ondataavailable = event => {
-            if (roomJoined && ws.readyState === 1) {
-                const blob = new Blob([event.data], {'type': codec});
-                console.log("SEND BLOB")
-                ws.send(blob);
-            }
-        };
-        recorder.start(1000);
     })
 
-videoServer.src = window.URL.createObjectURL(mediaSource);
-mediaSource.addEventListener('sourceopen', function (e) {
-    console.log('MediaSource sourceopen')
-    // buffer for video media source
-    mediaSourceBuffer = mediaSource.addSourceBuffer(codec);
-});
+// update canvas every X ms
+setInterval(
+    function () {
+        canvasClient
+            .getContext('2d')
+            .drawImage(videoClient, 0, 0, canvasClient.width, canvasClient.height);
+
+        // when WS is connected  send canvas as image to the server
+        console.log('WS STATE', ws.readyState);
+        if (ws.readyState === WebSocket.OPEN && roomJoined) {
+            console.log('WS STATE send', ws.readyState);
+            let data = canvasClient.toDataURL('image/jpeg', 1.0);
+            //
+            let blob = dataURItoBlob(data);
+            ws.send(blob)
+        }
+    }, 100
+);
 
 // connect to ws
 connectWebSocket();
