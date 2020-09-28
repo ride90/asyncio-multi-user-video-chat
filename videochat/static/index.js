@@ -6,8 +6,8 @@ let roomLink = document.getElementById('room-link');
 btn.onclick = () => {
     var xhr = new XMLHttpRequest();
     xhr.open(
-        'GET',
-        window._config['api_url'] + '/r',
+        'POST',
+        window._config['api_url'],
         true
     );
     xhr.onload = function () {
