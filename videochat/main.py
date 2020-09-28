@@ -1,4 +1,7 @@
-import uvicorn
+import asyncio
+
+import hypercorn
+from hypercorn.asyncio import serve
 from fastapi import FastAPI
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
@@ -6,11 +9,12 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 import settings
 import exceptions
-from routers import rooms
+from routers import rooms, ws
 
 
 app = FastAPI()
 # routers
+app.include_router(ws.router)
 app.include_router(rooms.router)
 # custom exception handlers
 app.add_exception_handler(StarletteHTTPException, exceptions.http_exception_handler)
@@ -28,13 +32,12 @@ app.templates.env.globals.update({
 app._rooms = {}
 
 if __name__ == '__main__':
-    config = {
-        'host': settings.HOST,
-        'port': settings.PORT,
-        'reload': settings.DEBUG,
-        'debug': settings.DEBUG
-    }
+    config = hypercorn.config.Config()
+    config.bind = f"{settings.HOST}:{settings.PORT}"
+    config.debug = settings.DEBUG
+    config.use_reloader = settings.DEBUG
     if settings.SSL:
-        config['ssl_keyfile'] = settings.SSL_KEY_PATH
-        config['ssl_certfile'] = settings.SSL_CRT_PATH
-    uvicorn.run('main:app', **config)
+        config.keyfile = settings.SSL_KEY_PATH
+        config.certfile = settings.SSL_CRT_PATH
+
+    asyncio.run(serve(app, config))

@@ -38,7 +38,7 @@ function dataURItoBlob(dataURI) {
 
 function connectWebSocket() {
     ws = new WebSocket(window._config['ws_url']);
-    ws.binaryType = 'arraybuffer';
+    // ws.binaryType = 'arraybuffer';
     ws.onopen = function () {
         console.log("Openened connection to websocket");
 

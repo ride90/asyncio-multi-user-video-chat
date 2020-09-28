@@ -34,7 +34,9 @@ async def create_room(request: Request):
 @router.get('/r/{room_id}', tags=["rooms"], response_class=HTMLResponse)
 async def get_room(request: Request, room_id: str):
     if not utils.get_room(room_id, request.app._rooms):
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+        if not settings.DEBUG:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+        utils.add_room(room_id=room_id, storage=request.app._rooms)
 
     return request.app.templates.TemplateResponse(
         'room.jinja2', {'request': request}

@@ -22,7 +22,7 @@ SSL_KEY_PATH = os.environ.get('SSL_KEY_PATH', '../certificate/sslcert.key')
 JINJA2_TEMPLATES_DIR = 'templates'
 
 # client config
-WS_URL = os.environ.get('API_URL', f'wss://{HOST}:{PORT}/ws')
+WS_URL = os.environ.get('WS_URL', f'wss://{HOST}:{PORT}/ws')
 API_URL = os.environ.get('API_URL', f'https://{HOST}:{PORT}')
 
 # app
