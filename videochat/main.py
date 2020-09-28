@@ -14,10 +14,15 @@ app = FastAPI()
 app.include_router(rooms.router)
 # custom exception handlers
 app.add_exception_handler(StarletteHTTPException, exceptions.http_exception_handler)
-# static && templates
+# static
 if settings.SERVE_STATIC:
     app.mount("/static", StaticFiles(directory=settings.STATIC_DIR), name='static')
+    # jinja2
 app.templates = Jinja2Templates(directory=settings.JINJA2_TEMPLATES_DIR)
+app.templates.env.globals.update({
+    'API_URL': settings.API_URL,
+    'WS_URL': settings.WS_URL
+})
 # rooms
 # this one should be something else (redis, zeromq)
 app._rooms = {}
