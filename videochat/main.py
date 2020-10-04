@@ -34,10 +34,11 @@ app._rooms = {}
 if __name__ == '__main__':
     config = hypercorn.config.Config()
     config.bind = f"{settings.HOST}:{settings.PORT}"
-    config.debug = settings.DEBUG
     config.use_reloader = settings.DEBUG
     if settings.SSL:
         config.keyfile = settings.SSL_KEY_PATH
         config.certfile = settings.SSL_CRT_PATH
-
-    asyncio.run(serve(app, config))
+    # get loop and run app
+    loop = asyncio.get_event_loop()
+    loop.set_debug(settings.DEBUG)
+    loop.run_until_complete(future=serve(app, config))

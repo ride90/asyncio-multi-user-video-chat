@@ -6,9 +6,6 @@ router = APIRouter()
 
 @router.websocket("/ws")
 async def ws_handler(websocket: WebSocket):
-
-    print('AAAAAAAAAAAAAAAAAA')
-
     await websocket.accept()
 
     print('[WS] New connection is created')
